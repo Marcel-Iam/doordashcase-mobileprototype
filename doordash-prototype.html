@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoorDash Driver Gamification Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #191919;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #888888;
+            font-size: 16px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #EB1700;
+            color: #EB1700;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            background: #EB1700;
+            color: white;
+        }
+
+        .tab-button.active {
+            background: #EB1700;
+            color: white;
+        }
+
+        .screen-container {
+            display: none;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .screen-container.active {
+            display: flex;
+        }
+
+        .phone-mockup {
+            width: 375px;
+            height: 812px;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+            border: 12px solid #191919;
+        }
+
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 30px;
+            background: #191919;
+            border-radius: 0 0 20px 20px;
+            z-index: 10;
+        }
+
+        .screen-content {
+            height: 100%;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .status-bar {
+            padding: 35px 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #191919;
+        }
+
+        /* Celebration Screen Styles */
+        .celebration-screen {
+            text-align: center;
+            padding: 60px 30px;
+            background: linear-gradient(135deg, #EB1700 0%, #c91400 100%);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .confetti {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .celebration-screen h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .celebration-screen .subtitle {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .badge {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            margin: 30px auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .reward-box {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .reward-amount {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .continue-btn {
+            background: white;
+            color: #EB1700;
+            padding: 16px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        /* Progress Dashboard Styles */
+        .dashboard-header {
+            background: linear-gradient(135deg, #EB1700 0%, #c91400 100%);
+            padding: 50px 20px 30px;
+            color: white;
+        }
+
+        .dashboard-header h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .progress-card {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-bar-container {
+            background: rgba(255,255,255,0.3);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: white;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .achievements-section {
+            padding: 25px 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #191919;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .achievement-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .achievement-card.unlocked {
+            border-color: #009b8a;
+            background: linear-gradient(to right, rgba(0,155,138,0.05), white);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.5;
+        }
+
+        .achievement-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .achievement-icon.unlocked {
+            background: #009b8a;
+        }
+
+        .achievement-icon.locked {
+            background: #e0e0e0;
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-info h4 {
+            font-size: 16px;
+            color: #191919;
+            margin-bottom: 5px;
+        }
+
+        .achievement-info p {
+            font-size: 13px;
+            color: #888888;
+        }
+
+        .achievement-status {
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .achievement-status.complete {
+            background: #009b8a;
+            color: white;
+        }
+
+        .achievement-status.progress {
+            background: #f8f8f8;
+            color: #888888;
+        }
+
+        /* Onboarding Styles */
+        .onboarding-screen {
+            padding: 50px 20px 20px;
+        }
+
+        .onboarding-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .onboarding-header h2 {
+            font-size: 28px;
+            color: #191919;
+            margin-bottom: 10px;
+        }
+
+        .onboarding-header p {
+            font-size: 16px;
+            color: #888888;
+        }
+
+        .bingo-card {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            padding: 0;
+            max-width: 310px;
+            margin: 0 auto;
+        }
+
+        .bingo-box {
+            aspect-ratio: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 4px;
+            position: relative;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .bingo-box.completed {
+            border-color: #009b8a;
+            background: linear-gradient(135deg, rgba(0,155,138,0.1) 0%, rgba(0,155,138,0.05) 100%);
+        }
+
+        .bingo-box.current {
+            border-color: #EB1700;
+            background: linear-gradient(135deg, rgba(235,23,0,0.1) 0%, rgba(235,23,0,0.05) 100%);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .bingo-number {
+            position: absolute;
+            top: 3px;
+            left: 5px;
+            font-size: 9px;
+            font-weight: bold;
+            color: #888888;
+        }
+
+        .bingo-box.completed .bingo-number,
+        .bingo-box.current .bingo-number {
+            color: #191919;
+        }
+
+        .bingo-icon {
+            font-size: 22px;
+            margin-bottom: 2px;
+        }
+
+        .bingo-reward {
+            font-size: 7.5px;
+            text-align: center;
+            color: #888888;
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        .bingo-box.completed .bingo-reward,
+        .bingo-box.current .bingo-reward {
+            color: #191919;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 16px;
+            height: 16px;
+            background: #009b8a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .current-indicator {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 16px;
+            height: 16px;
+            background: #EB1700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .bingo-legend {
+            padding: 20px 15px 10px;
+            font-size: 12px;
+            color: #888888;
+            text-align: center;
+        }
+
+        .legend-items {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid;
+        }
+
+        .legend-box.completed {
+            border-color: #009b8a;
+            background: rgba(0,155,138,0.1);
+        }
+
+        .legend-box.current {
+            border-color: #EB1700;
+            background: rgba(235,23,0,0.1);
+        }
+
+        .legend-box.locked {
+            border-color: #e0e0e0;
+            background: white;
+        }
+
+        .countdown-banner {
+            background: linear-gradient(135deg, #f86a34 0%, #EB1700 100%);
+            color: white;
+            padding: 12px 20px;
+            margin: 15px 0 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(235, 23, 0, 0.2);
+        }
+
+        .countdown-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .countdown-icon {
+            font-size: 24px;
+        }
+
+        .countdown-text {
+            text-align: left;
+        }
+
+        .countdown-title {
+            font-size: 12px;
+            opacity: 0.9;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .countdown-time {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .countdown-badge {
+            background: rgba(255,255,255,0.25);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* Continuous Reengagement Styles */
+        .reengagement-screen {
+            padding: 50px 20px 80px;
+        }
+
+        .featured-item-card {
+            background: linear-gradient(135deg, #191919 0%, #2a2a2a 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 0 0 25px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .featured-badge {
+            background: #EB1700;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .featured-item-card h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .featured-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .item-showcase {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .item-image {
+            font-size: 80px;
+            margin-bottom: 15px;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .item-description {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .progress-to-unlock {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-to-unlock .label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .progress-meter {
+            background: rgba(255,255,255,0.2);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #009b8a 0%, #00d5b8 100%);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .next-month-preview {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .preview-header h4 {
+            font-size: 18px;
+            color: #191919;
+        }
+
+        .preview-tag {
+            background: #f8f8f8;
+            color: #888888;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .preview-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8f8f8;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .preview-icon {
+            font-size: 50px;
+        }
+
+        .preview-info h5 {
+            font-size: 16px;
+            color: #191919;
+            margin-bottom: 5px;
+        }
+
+        .preview-info p {
+            font-size: 12px;
+            color: #888888;
+        }
+
+        .long-term-goals {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .long-term-goals h4 {
+            font-size: 18px;
+            color: #191919;
+            margin-bottom: 15px;
+        }
+
+        .goal-card {
+            background: linear-gradient(135deg, rgba(0,155,138,0.1) 0%, rgba(0,155,138,0.05) 100%);
+            border: 2px solid #009b8a;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+        }
+
+        .goal-card.premium {
+            background: linear-gradient(135deg, rgba(235,23,0,0.1) 0%, rgba(235,23,0,0.05) 100%);
+            border-color: #EB1700;
+        }
+
+        .goal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .goal-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .goal-icon {
+            font-size: 28px;
+        }
+
+        .goal-title-text h5 {
+            font-size: 16px;
+            color: #191919;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .goal-title-text p {
+            font-size: 12px;
+            color: #888888;
+        }
+
+        .goal-status {
+            background: #009b8a;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .goal-status.locked {
+            background: #888888;
+        }
+
+        .goal-progress {
+            margin-bottom: 8px;
+        }
+
+        .goal-progress-bar {
+            background: rgba(0,0,0,0.1);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .goal-progress-fill {
+            height: 100%;
+            background: #009b8a;
+            border-radius: 4px;
+        }
+
+        .goal-progress-fill.premium {
+            background: #EB1700;
+        }
+
+        .goal-progress-text {
+            font-size: 11px;
+            color: #888888;
+        }
+
+        .goal-reward {
+            background: rgba(255,255,255,0.8);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 12px;
+            color: #191919;
+            font-weight: 600;
+        }
+
+        .monthly-streak {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .monthly-streak h4 {
+            font-size: 18px;
+            color: #191919;
+            margin-bottom: 15px;
+        }
+
+        .streak-months {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .streak-month {
+            flex: 1;
+            aspect-ratio: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #888888;
+        }
+
+        .streak-month.completed {
+            border-color: #009b8a;
+            background: rgba(0,155,138,0.1);
+            color: #191919;
+        }
+
+        .streak-month .month-icon {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+
+        .streak-month .month-label {
+            font-weight: 600;
+        }
+
+        .streak-reward-text {
+            font-size: 12px;
+            color: #888888;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .streak-final-reward {
+            background: linear-gradient(135deg, #EB1700 0%, #c91400 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .streak-final-reward .reward-label {
+            font-size: 11px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .streak-final-reward .reward-items {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .streak-final-reward .reward-icon {
+            font-size: 32px;
+        }
+
+        /* Milestone Rewards Styles */
+        .rewards-screen {
+            padding: 50px 20px 20px;
+        }
+
+        .tier-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 3px solid transparent;
+        }
+
+        .tier-card.active {
+            border-color: #EB1700;
+        }
+
+        .tier-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .tier-title {
+            font-size: 20px;
+            color: #191919;
+            font-weight: bold;
+        }
+
+        .tier-badge {
+            background: #EB1700;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .tier-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .reward-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 10px;
+        }
+
+        .reward-item-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .reward-item-name {
+            font-size: 13px;
+            color: #191919;
+            font-weight: 600;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            background: white;
+            border-radius: 25px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-item {
+            text-align: center;
+            padding: 8px;
+            color: #888888;
+            font-size: 11px;
+        }
+
+        .nav-item.active {
+            color: #EB1700;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 DoorDash Driver Gamification Prototype</h1>
+            <p>Interactive mockups showcasing driver engagement features</p>
+        </div>
+
+        <div class="nav-tabs">
+            <div style="width: 100%; text-align: center; margin-bottom: 15px;">
+                <span style="background: #EB1700; color: white; padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block;">📱 NEW USERS (First 30 Days)</span>
+            </div>
+            <button class="tab-button active" onclick="showScreen(0)">Progress Dashboard</button>
+            <button class="tab-button" onclick="showScreen(1)">6th Order Celebration</button>
+            <button class="tab-button" onclick="showScreen(2)">Onboarding Journey</button>
+            <button class="tab-button" onclick="showScreen(3)">Milestone Rewards</button>
+            
+            <div style="width: 100%; text-align: center; margin: 25px 0 15px;">
+                <span style="background: #009b8a; color: white; padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: bold; display: inline-block;">🔄 AFTER FIRST MONTH</span>
+            </div>
+            <button class="tab-button" onclick="showScreen(4)">Continuous Reengagement</button>
+        </div>
+
+        <!-- Screen 1: Progress Dashboard -->
+        <div class="screen-container active" id="screen-0">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content">
+                    <div class="dashboard-header">
+                        <h3>Your Journey</h3>
+                        <div class="progress-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-size: 14px;">Current Tier: Part-Time Driver</span>
+                                <span style="font-size: 24px;">🏆</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: 45%;"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>9 deliveries</span>
+                                <span>Next reward at 10</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="achievements-section">
+                        <div class="section-title">Recent Achievements</div>
+                        
+                        <div class="achievement-card unlocked">
+                            <div class="achievement-icon unlocked">⭐</div>
+                            <div class="achievement-info">
+                                <h4>Experienced Driver</h4>
+                                <p>Completed 6 deliveries this month</p>
+                            </div>
+                            <div class="achievement-status complete">+$5 Bonus</div>
+                        </div>
+
+                        <div class="achievement-card unlocked">
+                            <div class="achievement-icon unlocked">⚡</div>
+                            <div class="achievement-info">
+                                <h4>Weekend Warrior</h4>
+                                <p>First weekend shift complete</p>
+                            </div>
+                            <div class="achievement-status complete">Unlocked</div>
+                        </div>
+
+                        <div class="achievement-card locked">
+                            <div class="achievement-icon locked">🎁</div>
+                            <div class="achievement-info">
+                                <h4>10 Delivery Milestone</h4>
+                                <p>Unlock branded apparel</p>
+                            </div>
+                            <div class="achievement-status progress">1 more</div>
+                        </div>
+
+                        <div class="achievement-card locked">
+                            <div class="achievement-icon locked">📱</div>
+                            <div class="achievement-info">
+                                <h4>Power Dasher</h4>
+                                <p>Complete 20 deliveries for premium gear</p>
+                            </div>
+                            <div class="achievement-status progress">11 to go</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: 6th Order Celebration -->
+        <div class="screen-container" id="screen-1">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content">
+                    <div class="celebration-screen">
+                        <div class="confetti">🎉</div>
+                        <h2>Congratulations!</h2>
+                        <p class="subtitle">You've earned Experienced Driver status!</p>
+                        
+                        <div class="badge">⭐</div>
+                        
+                        <div class="reward-box">
+                            <div style="font-size: 16px; margin-bottom: 10px;">Your Bonus</div>
+                            <div class="reward-amount">$5.00</div>
+                            <div style="font-size: 14px; opacity: 0.9;">Added to your earnings</div>
+                        </div>
+
+                        <div style="font-size: 14px; opacity: 0.9; margin-top: 25px; line-height: 1.6;">
+                            You're now part of our experienced driver community! Keep going to unlock exclusive rewards and perks.
+                        </div>
+
+                        <button class="continue-btn">Continue Dashing</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Onboarding Journey -->
+        <div class="screen-container" id="screen-2">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content">
+                    <div class="onboarding-screen">
+                        <div class="onboarding-header">
+                            <h2>Your First 20 Deliveries</h2>
+                            <p>Complete deliveries to unlock rewards</p>
+                        </div>
+
+                        <div class="countdown-banner">
+                            <div class="countdown-content">
+                                <div class="countdown-icon">⏰</div>
+                                <div class="countdown-text">
+                                    <div class="countdown-title">Reward Program Expires</div>
+                                    <div class="countdown-time">30 Days Left</div>
+                                </div>
+                            </div>
+                            <div class="countdown-badge">LIMITED TIME</div>
+                        </div>
+
+                        <div class="bingo-card">
+                            <!-- Row 1 -->
+                            <div class="bingo-box completed">
+                                <div class="bingo-number">#1</div>
+                                <div class="checkmark">✓</div>
+                                <div class="bingo-icon">🎉</div>
+                                <div class="bingo-reward">Welcome Bonus</div>
+                            </div>
+                            <div class="bingo-box completed">
+                                <div class="bingo-number">#2</div>
+                                <div class="checkmark">✓</div>
+                                <div class="bingo-icon">⚡</div>
+                                <div class="bingo-reward">Quick Start</div>
+                            </div>
+                            <div class="bingo-box completed">
+                                <div class="bingo-number">#3</div>
+                                <div class="checkmark">✓</div>
+                                <div class="bingo-icon">🏅</div>
+                                <div class="bingo-reward">Learner Badge</div>
+                            </div>
+                            <div class="bingo-box completed">
+                                <div class="bingo-number">#4</div>
+                                <div class="checkmark">✓</div>
+                                <div class="bingo-icon">🔥</div>
+                                <div class="bingo-reward">On Fire!</div>
+                            </div>
+
+                            <!-- Row 2 -->
+                            <div class="bingo-box completed">
+                                <div class="bingo-number">#5</div>
+                                <div class="checkmark">✓</div>
+                                <div class="bingo-icon">🌟</div>
+                                <div class="bingo-reward">5-Star Streak</div>
+                            </div>
+                            <div class="bingo-box current">
+                                <div class="bingo-number">#6</div>
+                                <div class="current-indicator">→</div>
+                                <div class="bingo-icon">⭐</div>
+                                <div class="bingo-reward">$5 Bonus</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#7</div>
+                                <div class="bingo-icon">💪</div>
+                                <div class="bingo-reward">Week Strong</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#8</div>
+                                <div class="bingo-icon">🎯</div>
+                                <div class="bingo-reward">Peak Hours</div>
+                            </div>
+
+                            <!-- Row 3 -->
+                            <div class="bingo-box">
+                                <div class="bingo-number">#9</div>
+                                <div class="bingo-icon">🚀</div>
+                                <div class="bingo-reward">Speed Demon</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#10</div>
+                                <div class="bingo-icon">👕</div>
+                                <div class="bingo-reward">DD Apparel</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#11</div>
+                                <div class="bingo-icon">💎</div>
+                                <div class="bingo-reward">Priority Dash</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#12</div>
+                                <div class="bingo-icon">🏆</div>
+                                <div class="bingo-reward">Top Dasher</div>
+                            </div>
+
+                            <!-- Row 4 -->
+                            <div class="bingo-box">
+                                <div class="bingo-number">#13</div>
+                                <div class="bingo-icon">🎊</div>
+                                <div class="bingo-reward">Lucky 13</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#14</div>
+                                <div class="bingo-icon">📍</div>
+                                <div class="bingo-reward">Area Expert</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#15</div>
+                                <div class="bingo-icon">🔥</div>
+                                <div class="bingo-reward">Hot Streak</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#16</div>
+                                <div class="bingo-icon">⏱️</div>
+                                <div class="bingo-reward">Speed Bonus</div>
+                            </div>
+
+                            <!-- Row 5 -->
+                            <div class="bingo-box">
+                                <div class="bingo-number">#17</div>
+                                <div class="bingo-icon">🌙</div>
+                                <div class="bingo-reward">Night Owl</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#18</div>
+                                <div class="bingo-icon">🎁</div>
+                                <div class="bingo-reward">Almost There</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#19</div>
+                                <div class="bingo-icon">💫</div>
+                                <div class="bingo-reward">Final Push</div>
+                            </div>
+                            <div class="bingo-box">
+                                <div class="bingo-number">#20</div>
+                                <div class="bingo-icon">📱</div>
+                                <div class="bingo-reward">Premium Kit</div>
+                            </div>
+                        </div>
+
+                        <div class="bingo-legend">
+                            <div>Tap any box to see reward details</div>
+                            <div class="legend-items">
+                                <div class="legend-item">
+                                    <div class="legend-box completed"></div>
+                                    <span>Complete</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-box current"></div>
+                                    <span>Current</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-box locked"></div>
+                                    <span>Locked</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 4: Milestone Rewards -->
+        <div class="screen-container" id="screen-3">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content">
+                    <div class="rewards-screen">
+                        <div class="onboarding-header">
+                            <h2>Milestone Rewards</h2>
+                            <p>Physical items you can earn</p>
+                        </div>
+
+                        <div class="countdown-banner">
+                            <div class="countdown-content">
+                                <div class="countdown-icon">⏰</div>
+                                <div class="countdown-text">
+                                    <div class="countdown-title">Claim Your Rewards</div>
+                                    <div class="countdown-time">30 Days Left</div>
+                                </div>
+                            </div>
+                            <div class="countdown-badge">ACT NOW</div>
+                        </div>
+
+                        <div class="tier-card active">
+                            <div class="tier-header">
+                                <div class="tier-title">10 Deliveries</div>
+                                <div class="tier-badge">NEXT REWARD</div>
+                            </div>
+                            <div style="color: #888888; font-size: 13px; margin-bottom: 15px;">
+                                Show your DoorDash pride with official branded apparel
+                            </div>
+                            <div class="tier-items">
+                                <div class="reward-item">
+                                    <div class="reward-item-icon">👕</div>
+                                    <div class="reward-item-name">Premium T-Shirt</div>
+                                </div>
+                                <div class="reward-item">
+                                    <div class="reward-item-icon">🧢</div>
+                                    <div class="reward-item-name">Baseball Cap</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tier-card">
+                            <div class="tier-header">
+                                <div class="tier-title">20 Deliveries</div>
+                                <div class="tier-badge" style="background: #888888;">LOCKED</div>
+                            </div>
+                            <div style="color: #888888; font-size: 13px; margin-bottom: 15px;">
+                                Professional equipment to make dashing easier
+                            </div>
+                            <div class="tier-items">
+                                <div class="reward-item">
+                                    <div class="reward-item-icon">📱</div>
+                                    <div class="reward-item-name">Phone Mount</div>
+                                </div>
+                                <div class="reward-item">
+                                    <div class="reward-item-icon">🔋</div>
+                                    <div class="reward-item-name">Power Bank</div>
+                                </div>
+                                <div class="reward-item">
+                                    <div class="reward-item-icon">🎒</div>
+                                    <div class="reward-item-name">Insulated Bag</div>
+                                </div>
+                                <div class="reward-item">
+                                    <div class="reward-item-icon">💡</div>
+                                    <div class="reward-item-name">LED Topper</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; padding: 20px; color: #888888; font-size: 13px; line-height: 1.6;">
+                            All items are yours to keep! These rewards recognize your commitment and help you deliver like a pro.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 5: Continuous Reengagement -->
+        <div class="screen-container" id="screen-4">
+            <div class="phone-mockup">
+                <div class="phone-notch"></div>
+                <div class="screen-content">
+                    <div class="reengagement-screen">
+                        <div class="onboarding-header">
+                            <h2>Keep The Momentum</h2>
+                            <p>New rewards every month</p>
+                        </div>
+
+                        <!-- Featured Item of the Month -->
+                        <div class="featured-item-card">
+                            <div class="featured-badge">🌟 FEATURED THIS MONTH</div>
+                            <h3>December Exclusive</h3>
+                            <p class="featured-subtitle">Available only this month</p>
+                            
+                            <div class="item-showcase">
+                                <div class="item-image">🧤</div>
+                                <div class="item-name">Premium Winter Gloves</div>
+                                <div class="item-description">Touchscreen-compatible, insulated delivery gloves</div>
+                            </div>
+
+                            <div class="progress-to-unlock">
+                                <div class="label">Your Progress to Unlock</div>
+                                <div class="progress-meter">
+                                    <div class="progress-fill" style="width: 75%;"></div>
+                                </div>
+                                <div class="progress-stats">
+                                    <span>15 / 20 deliveries</span>
+                                    <span style="color: #00d5b8;">5 more to go!</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Next Month Preview -->
+                        <div class="next-month-preview">
+                            <div class="preview-header">
+                                <h4>Coming Next Month</h4>
+                                <div class="preview-tag">JANUARY 2026</div>
+                            </div>
+                            <div class="preview-item">
+                                <div class="preview-icon">☕</div>
+                                <div class="preview-info">
+                                    <h5>DoorDash Insulated Mug</h5>
+                                    <p>Keep your drinks hot or cold on the go • 20 deliveries to unlock</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Streak Tracker -->
+                        <div class="monthly-streak">
+                            <h4>6-Month Streak Challenge</h4>
+                            <div class="streak-months">
+                                <div class="streak-month completed">
+                                    <div class="month-icon">✓</div>
+                                    <div class="month-label">JUL</div>
+                                </div>
+                                <div class="streak-month completed">
+                                    <div class="month-icon">✓</div>
+                                    <div class="month-label">AUG</div>
+                                </div>
+                                <div class="streak-month completed">
+                                    <div class="month-icon">✓</div>
+                                    <div class="month-label">SEP</div>
+                                </div>
+                                <div class="streak-month completed">
+                                    <div class="month-icon">✓</div>
+                                    <div class="month-label">OCT</div>
+                                </div>
+                                <div class="streak-month completed">
+                                    <div class="month-icon">✓</div>
+                                    <div class="month-label">NOV</div>
+                                </div>
+                                <div class="streak-month">
+                                    <div class="month-icon">🎯</div>
+                                    <div class="month-label">DEC</div>
+                                </div>
+                            </div>
+                            <div class="streak-reward-text">
+                                Complete 20 deliveries this month to maintain your streak!<br>
+                                <strong style="color: #EB1700;">5 of 6 months complete • 15/20 this month</strong>
+                            </div>
+                            <div class="streak-final-reward">
+                                <div class="reward-label">🏆 COMPLETE 6 MONTHS TO UNLOCK</div>
+                                <div class="reward-items">
+                                    <div class="reward-icon">🧥</div>
+                                    <div>Exclusive Elite Dasher Jacket + Permanent Elite Status</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Long-term Goals -->
+                        <div class="long-term-goals">
+                            <h4>Monthly Bonus Goal</h4>
+
+                            <!-- 40 Order Goal -->
+                            <div class="goal-card">
+                                <div class="goal-header">
+                                    <div class="goal-title">
+                                        <div class="goal-icon">📈</div>
+                                        <div class="goal-title-text">
+                                            <h5>Earnings Booster</h5>
+                                            <p>Complete 40 deliveries this month</p>
+                                        </div>
+                                    </div>
+                                    <div class="goal-status locked">LOCKED</div>
+                                </div>
+                                <div class="goal-progress">
+                                    <div class="goal-progress-bar">
+                                        <div class="goal-progress-fill" style="width: 37.5%;"></div>
+                                    </div>
+                                    <div class="goal-progress-text">15/40 deliveries • 25 more to unlock</div>
+                                </div>
+                                <div class="goal-reward">
+                                    💰 10% bonus on all orders 41-60 for the rest of December
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showScreen(index) {
+            // Hide all screens
+            const screens = document.querySelectorAll('.screen-container');
+            screens.forEach(screen => screen.classList.remove('active'));
+            
+            // Hide all tab buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected screen
+            document.getElementById(`screen-${index}`).classList.add('active');
+            buttons[index].classList.add('active');
+        }
+    </script>
+</body>
+</html>
